@@ -1,4 +1,4 @@
-{% extends 'base/base.html' %}
+{% extends 'static_base_html/static_base.html' %}
 {% load staticfiles %}
 
 {% block title %}天天生鲜-首页{% endblock%}
@@ -26,16 +26,14 @@
         {# 商品分类 #}
 		<ul class="subnav fl">
             {% for type in goods_types %}
-                <li><a href="{% url 'goods:list' type.id 1 %}"><i class="iconfont {{ type.logo }}"></i
-                >{{ type.name }}</a></li>
+                <li><a href=""><i class="iconfont {{ type.logo }}"></i>{{ type.name }}</a></li>
 			{% endfor %}
 		</ul>
         {# 分类轮播图 #}
 		<div class="slide fl">
 			<ul class="slide_pics">
                 {% for banner in index_banners %}
-                    <li><a href="{% url 'goods:detail' banner.sku.id %}"><img src="{{ banner.image }}"
-                                                                             alt="幻灯片"></a></li>
+                    <li><a href="#"><img src="{{ banner.image }}" alt="幻灯片"></a></li>
 				{% endfor %}
 			</ul>
 			<div class="prev"></div>
@@ -71,7 +69,7 @@
                 {% for show_goods in type.good_sku_obj %}
 				<li>
 					<h4><a href="#">{{ show_goods.name }}</a></h4>
-					<a href="{% url 'goods:detail' show_goods.id %}"><img src="{{ show_goods.image }}"></a>
+					<a href="#"><img src="{{ show_goods.image }}"></a>
 					<div class="prize">¥ {{ show_goods.price }}</div>
 				</li>
                 {% endfor %}
@@ -80,4 +78,3 @@
 	</div>
     {% endfor %}
 {% endblock %}
-

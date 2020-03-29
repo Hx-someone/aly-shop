@@ -5,8 +5,12 @@
 @File    : urls.py
 """
 from django.urls import path
-app_name = 'cart'
-urlpatterns = [
+from cart import  views
 
+app_name = 'cart'
+
+urlpatterns = [
+    path('',views.CartIndexView.as_view(), name="index"),
+    path('add/',views.AddCartView.as_view(), name="add")
 
 ]

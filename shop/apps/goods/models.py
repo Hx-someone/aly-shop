@@ -16,6 +16,7 @@ class GoodsType(BaseModel):
         verbose_name = '商品种类'
         verbose_name_plural = verbose_name
 
+
     def __str__(self):
         return self.name
 
@@ -138,3 +139,43 @@ class IndexPromotionBanner(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class GoodsComments(BaseModel):
+    """
+    create news comments models
+    field:
+        content
+        author
+        news
+        parent
+    """
+    content = models.TextField(verbose_name="评论内容", help_text="评论内容")
+    user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True)
+    goods = models.ForeignKey("GoodsSKU", on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)  # 自我关联，多级评论，blank允许前端不传数据
+
+    class Meta:
+        ordering = ["-update_time", "-id"]
+        db_table = "tb_goods_comments"
+        verbose_name = "评论内容"
+        verbose_name_plural = verbose_name
+
+    def get_comment_count(self):
+        return
+
+    # 自定义字典转化
+    def to_dict_data(self):
+        comment_dict_data = {
+            "comment_id": self.id,  # 评论id
+            "goods_id": self.goods.id,  # 商品id
+            "content": self.content,  # 评论内容
+            "update_time": self.update_time.strftime("%Y年%m月%d日"),  # 更新日期
+            "user": self.user.username,  # 评论人
+            "parent": self.parent.to_dict_data() if self.parent else None  # 二级评论
+        }
+
+        return comment_dict_data
+
+    def __str__(self):
+        return "评论内容：{}".format(self.content)

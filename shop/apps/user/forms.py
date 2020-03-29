@@ -6,6 +6,8 @@
 """
 import re
 from django import forms
+from django.core.validators import RegexValidator
+
 from user import models
 from django.db.models import Q
 from user import contains
@@ -197,8 +199,8 @@ class ResetPasswordForm(forms.Form):
         new_password = cleaned_data.get("new_password")
         re_new_password = cleaned_data.get("re_new_password")
 
-        user_queryset = models.Users.objects.filter(Q(username=login_name) |
-                                                    Q(mobile=login_name))
+        user_queryset = models.User.objects.filter(Q(username=login_name) |
+                                                   Q(mobile=login_name))
 
         if user_queryset:
             user = user_queryset.first()
@@ -217,12 +219,74 @@ class ResetPasswordForm(forms.Form):
             raise forms.ValidationError("用户名不存在，请重新输入")
 
 
+mobile_regex = RegexValidator(r"^1[3-9]\d{9}$","手机号格式不正确")
+zip_code_regex = RegexValidator(r"^\d{6}$","邮编格式不正确")
+
+class AddressForm(forms.Form):
+    receiver = forms.CharField(
+        max_length=18,
+        min_length=1,
+        error_messages={
+            "max_length": "收件人姓名格式不正确",
+            "min_length": "收件人姓名格式不正确",
+            "required": "收件人姓名不能为空"
+        }
+    )
+
+    address = forms.CharField(
+        max_length=200,
+        min_length=1,
+        error_messages={
+            "max_length": "收件人地址格式不正确",
+            "min_length": "收件人地址格式不正确",
+            "required": "收件人地址不能为空"
+        }
+    )
+
+    zip_code = forms.CharField(
+        validators=[zip_code_regex],
+        max_length=6,
+        min_length=6,
+        error_messages={
+            "max_length": "邮编长度不正确",
+            "min_length": "邮编长度不正确",
+            "required": "邮编不能为空"
+        })
 
 
+    phone = forms.CharField(
+        validators = [mobile_regex],
+        max_length=11,
+        min_length=11,
+        error_messages={
+            "max_length": "手机号长度不正确",
+            "min_length": "手机号长度不正确",
+            "required": "密码不能为空"
+        }
+    )
 
+    def __init__(self, *args, **kwargs):
+        self.user_id = kwargs.pop("user_id")
+        super().__init__(*args, **kwargs)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        receiver = cleaned_data.get("receiver")
+        address = cleaned_data.get("address")
+        zip_code = cleaned_data.get("zip_code")
+        phone = cleaned_data.get("phone")
 
+        address_data = {
+            "user_id": self.user_id,
+            "receiver": receiver,
+            "addr": address,
+            "zip_code": zip_code,
+            "phone": phone,
+        }
 
+        # 可以使用get_or_create获取或者是创建
+        if models.Address.objects.filter(**address_data):
+            return forms.ValidationError("该地址已存在，请重新添加新地址")
 
-
+        models.Address.objects.create(**address_data)
 

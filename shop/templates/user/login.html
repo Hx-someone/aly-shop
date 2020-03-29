@@ -1,8 +1,11 @@
 {% extends 'base/base.html' %}
 {% load staticfiles %}
-{% block title %}天天生鲜-登录{% endblock %}
-{% block header_con %}{% endblock %}
-{% block search_bar %}{% endblock %}
+
+{% block title %}登录{% endblock %}
+
+{% block header %}{% endblock %}
+{% block search %}{% endblock %}
+
 {% block content %}
     <div class="login_top clearfix">
         <a href="" class="login_logo"><img src="{% static 'images/logo02.png' %}"></a>
@@ -24,7 +27,7 @@
                                placeholder="请输入用户名">
                         <input type="password" name="pwd" class="pass_input" placeholder="请输入密码">
                         <div class="more_input clearfix">
-                            <input type="checkbox" name="remember" >
+                            <input type="checkbox" name="remember">
                             <label>记住用户名</label>
                             <a href="#">忘记密码</a>
                         </div>
@@ -36,9 +39,10 @@
     </div>
 
 {% endblock %}
+
 {% block script %}
     <script src="{% static 'js/user/login.js' %}"></script>
-    <script src="{% static 'js/message.js' %}"></script>
-<script src="{% static 'js/sweetalert.min.js' %}"></script>
-<script  src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/base/message.js' %}"></script>
+    <script src="{% static 'js/base/sweetalert.min.js' %}"></script>
+    <script src="{% static 'js/base/jquery.min.js' %}"></script>
 {% endblock %}

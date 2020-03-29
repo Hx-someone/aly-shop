@@ -120,7 +120,7 @@ $(function () {
             success: function (arg) {
                 console.log(arg);
                 if (arg.errno === "0") {   // errno: "0", errmsg: "短信发送正常", data: null
-                    alert("短信验证码发送成功");
+                    message.showError("短信验证码发送成功");
                     //倒计时功能
                     let num = 60;
                     // 设置计时器

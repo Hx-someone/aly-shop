@@ -4,7 +4,7 @@ from utils.json_code.status_code import Code, error_map
 from utils.json_code.to_json import to_json
 import json
 import re
-from user.forms import RegisterForm, LoginForm
+from user.forms import RegisterForm, LoginForm, AddressForm
 import logging
 from user import models
 import random
@@ -12,6 +12,11 @@ from django_redis import get_redis_connection
 from user import contains
 from django.contrib.auth import login, logout
 from django.shortcuts import redirect, reverse
+from user.models import Address
+
+from django_redis import get_redis_connection
+from goods.models import GoodsSKU
+from orders.models import OrderInfo
 
 logger = logging.getLogger("django")
 
@@ -178,6 +183,7 @@ class LogoutView(View):
         logout(request)
         return redirect(reverse("user:login"))  # 重定向到登录界面
 
+
 # class ResetPasswordView(View):
 #     """
 #     修改密码
@@ -204,3 +210,55 @@ class LogoutView(View):
 #                 err_msg_list.append(item[0])
 #             err_str = '/'.join(err_msg_list)
 #             return to_json(errno=Code.PARAMERR, errmsg=err_str)
+class UserCenterView(View):
+    def get(self, request):
+        user = request.user
+        default_address = Address.objects.get_default_address(user=user)
+
+        red_conn = get_redis_connection(alias="history")
+
+        history_key = "history_{}".format(user.id)
+
+        his_id = red_conn.lrange(history_key, 0, 4)  # 获取最新的5个浏览记录id
+
+        goods = [GoodsSKU.objects.filter(id=g_id).first() for g_id in his_id]
+
+        data = {
+            "user": user,
+            "default_address": default_address,
+            "his_goods": goods
+        }
+
+        return render(request, 'user/user_center.html', context=data)
+
+
+class UserShoppingCartView(View):
+    def get(self, request):
+        user_id = request.user.id
+        order_info = OrderInfo.objects.all().filter(user_id=user_id,is_delete=False)
+        for order in order_info:
+            print(order)
+        return render(request, 'user/shopping_cart.html',locals())
+
+
+class ShippingAddressView(View):
+    def get(self, request):
+        return render(request, 'user/shipping_address.html')
+
+    def post(self, request):
+        json_data = request.body
+
+        if not json_data:
+            return to_json(errno=Code.PARAMERR, errmsg="参数错误")
+        dict_data = json.loads(json_data)
+
+        form = AddressForm(data=dict_data, user_id=request.user.id)
+        if form.is_valid():
+            return to_json(errmsg="地址添加成功！")
+        err_msg_list = []
+
+        for item in form.errors.values():
+            err_msg_list.append(item[0])
+        err_str = "/".join(err_msg_list)
+
+        return to_json(errno=Code.PARAMERR, errmsg=err_str)
