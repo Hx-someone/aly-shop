@@ -5,12 +5,13 @@
 @File    : urls.py
 """
 from django.urls import path
-from cart import  views
+from cart import views
 
 app_name = 'cart'
 
 urlpatterns = [
-    path('',views.CartIndexView.as_view(), name="index"),
-    path('add/',views.AddCartView.as_view(), name="add")
+    path('', views.CartIndexView.as_view(), name="index"),
+    path('add/', views.AddCartView.as_view(), name="add"),
+    path('edit/<int:goods_id>/', views.CartEditView.as_view(), name="update"),
 
 ]
