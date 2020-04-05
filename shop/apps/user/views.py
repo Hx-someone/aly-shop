@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.views import View
 from utils.json_code.status_code import Code, error_map
 from utils.json_code.to_json import to_json
@@ -11,12 +11,13 @@ import random
 from django_redis import get_redis_connection
 from user import contains
 from django.contrib.auth import login, logout
-from django.shortcuts import redirect, reverse
+from django.core.paginator import Paginator
+
 from user.models import Address
 
 from django_redis import get_redis_connection
 from goods.models import GoodsSKU
-from orders.models import OrderInfo
+from orders.models import OrderInfo, OrderGoods
 
 logger = logging.getLogger("django")
 
@@ -108,6 +109,8 @@ class SmsCodeView(View):
 
 
 class RegisterView(View):
+    """用户注册"""
+
     def get(self, request):
         return render(request, 'user/register.html')
 
@@ -215,7 +218,7 @@ class UserCenterView(View):
         user = request.user
         default_address = Address.objects.get_default_address(user=user)
 
-        red_conn = get_redis_connection(alias="history")
+        red_conn = get_redis_connection("history")
 
         history_key = "history_{}".format(user.id)
 
@@ -232,18 +235,78 @@ class UserCenterView(View):
         return render(request, 'user/user_center.html', context=data)
 
 
-class UserShoppingCartView(View):
-    def get(self, request):
+class UserOrderView(View):
+    def get(self, request, page):
+        """
+        多个订单：
+            单个订单：
+                里面多个品种商品：
+                    每个品种商品多件
+                每个商品的总价格，总件数
+        :param request:
+        :param page:
+        :return:
+        """
         user_id = request.user.id
-        order_info = OrderInfo.objects.all().filter(user_id=user_id,is_delete=False)
-        for order in order_info:
-            print(order)
-        return render(request, 'user/shopping_cart.html',locals())
+        orders = OrderInfo.objects.all().filter(user_id=user_id, is_delete=False)  # 多个订单
+
+        for order in orders:
+            order_skus = OrderGoods.objects.filter(is_delete=False, order_id=order.order_id)  # 多件商品
+
+            for order_sku in order_skus:  # 给每个订单相同商品计算总价格
+                amount = order_sku.count * order_sku.price
+                order_sku.amount = amount
+
+            # 添加订单状态和更新订单商品信息
+            order.order_status = OrderInfo.ORDER_STATUS[order.order_status]
+            order.order_skus = order_skus
+
+        # 进行分页
+
+        # 1.构建分页对象
+        paginator = Paginator(orders, contains.ORDER_PAGE_PER_NUMBER)
+
+        # 2. 获取到分页数
+        try:
+            page = int(page)
+        except Exception as e:
+            return to_json(errno=Code.PARAMERR, errmsg="页码数必须为整数")
+
+        # 3. 判断页码是否超过总页数
+        if page < 1:
+            page = 1
+        if page > paginator.num_pages:  # 超过总页数，设定为最大
+            page = paginator.num_pages
+
+        # 4.构建每页的分页对象
+
+        order_page = paginator.page(page)
+        num_pages = paginator.num_pages
+        if num_pages < 5:
+            pages = range(1, num_pages)
+        elif page <= 3:
+            pages = range(1, 6)
+        elif num_pages - page <= 2:
+            pages = range(num_pages - 4, num_pages + 1)
+        else:
+            pages = range(page - 2, page + 3)
+
+        context = {
+            "order_page": order_page,
+            "pages": pages
+        }
+
+        return render(request, 'user/order.html', context=context)
 
 
 class ShippingAddressView(View):
     def get(self, request):
-        return render(request, 'user/shipping_address.html')
+        user = request.user
+        address = Address.objects.filter(user=user, is_default=True).first()
+        context = {
+            "address": address
+        }
+        return render(request, 'user/shipping_address.html', context=context)
 
     def post(self, request):
         json_data = request.body

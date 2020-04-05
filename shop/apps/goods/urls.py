@@ -12,5 +12,4 @@ urlpatterns = [
     path('index/', views.GoodsIndexView.as_view(), name="index"),
     path('detail/<int:goods_id>', views.GoodsDetailView.as_view(), name="detail"),
     path('list/<int:type_id>/<int:page>/', views.GoodsTypeListView.as_view(), name="list"),
-
 ]

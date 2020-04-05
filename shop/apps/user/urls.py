@@ -18,7 +18,7 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name="login"),
     path('logout/', views.LogoutView.as_view(), name="logout"),
 
-    path('user_center/', views.UserCenterView.as_view(),name="user_center"),
-    path('cart/', views.UserShoppingCartView.as_view(),name="cart"),
-    path('address/', views.ShippingAddressView.as_view(),name="address"),
+    path('user_center/', views.UserCenterView.as_view(), name="user_center"),
+    path('order/<int:page>/', views.UserOrderView.as_view(), name="order"),
+    path('address/', views.ShippingAddressView.as_view(), name="address"),
 ]

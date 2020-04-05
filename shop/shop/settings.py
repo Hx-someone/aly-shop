@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "orders",
     "goods",
     "cart",
+    'haystack'
 
 ]
 
@@ -218,10 +219,22 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
+        'django-shop': {
             'handlers': ['console', 'file'],
             'propagate': True,
             'level': 'INFO',
         },
     }
 }
+
+# 配置搜索引擎
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine",
+        "URL": 'http://172.31.245.61:9200/',  # elasticsearch.yml配置里设置的ip地址，端口默认为9200
+        "INDEX_NAME": 'shop',
+
+    }
+}
+
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 2

@@ -21,8 +21,8 @@
 	</ul>
 
 
-    <form method="post" action="">
-    {% csrf_token%}
+    <form action="{% url 'order:index' %}" method="post">
+    {% csrf_token %}
     {% for goods in goods_ls %}
 	<ul class="cart_list_td clearfix">
 		<li class="col01"><input type="checkbox" name="sku_ids"  value="{{ goods.id }}"></li>
@@ -32,9 +32,9 @@
 		<li class="col05">{{ goods.price }}元</li>
 		<li class="col06">
 			<div class="num_add">
-				<a href="javascript:;" class="add fl">+</a>
+				<a class="add fl">+</a>
 				<input type="text" data-goods-id="{{ goods.id }}" class="num_show fl" value="{{ goods.count }}">
-				<a href="javascript:;" class="minus fl">-</a>	
+				<a class="minus fl">-</a>
 			</div>
 		</li>
 		<li class="col07">{{ goods.amount }}元</li>
@@ -45,7 +45,7 @@
 		<li class="col01"><input type="checkbox" name=""></li>
 		<li class="col02">全选</li>
 		<li class="col03">合计(不含运费)：<span>¥</span><em>{{ total_price }}</em><br>共计<b>{{ total_count }}</b>件商品</li>
-		<li class="col04"><input type="submit" value="去结算"></li>
+		<li class="commit-btn"><input type="submit" value="去结算"></li>
 	</ul>
     </form>
 {% endblock %}
@@ -57,5 +57,6 @@
 <script src="{% static 'js/base/jQuery_3.3.1.js' %}"></script>
 <script src="{% static 'js/base/csrf.js' %}"></script>
    <script src="{% static 'js/cart/cart.js' %}"></script>
+{#    <script src="{% static 'js/cart/order_commit.js' %}"></script>#}
 
 {% endblock %}

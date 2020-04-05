@@ -222,6 +222,7 @@ class ResetPasswordForm(forms.Form):
 mobile_regex = RegexValidator(r"^1[3-9]\d{9}$","手机号格式不正确")
 zip_code_regex = RegexValidator(r"^\d{6}$","邮编格式不正确")
 
+
 class AddressForm(forms.Form):
     receiver = forms.CharField(
         max_length=18,
@@ -253,7 +254,6 @@ class AddressForm(forms.Form):
             "required": "邮编不能为空"
         })
 
-
     phone = forms.CharField(
         validators = [mobile_regex],
         max_length=11,
@@ -282,6 +282,7 @@ class AddressForm(forms.Form):
             "addr": address,
             "zip_code": zip_code,
             "phone": phone,
+            "is_default": True
         }
 
         # 可以使用get_or_create获取或者是创建

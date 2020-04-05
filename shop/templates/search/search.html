@@ -1,41 +1,61 @@
 {% extends 'goods/base_detail_list.html' %}
-{% block title %}天天生鲜-商品搜索列表{% endblock title %}
-{% block main_content %}
-	<div class="breadcrumb">
-		<a href="#">{{ query }}</a>
+
+{% block title %}
+    搜索结果
+{% endblock title %}
+
+{% block content %}
+    <div class="breadcrumb">
+		<a href="#">搜索结果:</a>
 		<span>></span>
-		<a href="#">搜索结果如下：</a>
+		<a href="#">{{ query }}</a>
 	</div>
+    <div class="main_wrap clearfix">
 
-	<div class="main_wrap clearfix">
-			<ul class="goods_type_list clearfix">
-                {% for item in page %}
-				<li>
-					<a href="{% url 'goods:detail' item.object.id %}"><img src="{{ item.object.image.url }}"></a>
-					<h4><a href="{% url 'goods:detail' item.object.id %}">{{ item.object.name }}</a></h4>
-					<div class="operate">
-						<span class="prize">￥{{ item.object.price }}</span>
-						<span class="unit">{{ item.object.price }}/{{ item.object.unite }}</span>
-						<a href="#" class="add_goods" title="加入购物车"></a>
-					</div>
-				</li>
+        <div class="r_wrap fr clearfix">
+
+
+            <ul class="goods_type_list clearfix">
+                {% for item in page %}  {# 这里可以将结果按照销量或者是热度进行排序 #}
+                    <li>
+                        <a href="{% url 'goods:detail' item.object.id %}"><img src="{{ item.object.image }}"></a>
+                        <h4><a href="{% url 'goods:detail' item.object.id %}">{{ item.object.name }}</a></h4>
+                        <div class="operate">
+                            <strong class="prize">￥{{ item.object.price }}</strong>
+                            <p class="desc">{{ item.object.desc }}</p>
+                            <p class="desc">已有<em>{{ item.object.goodscomments.goods.length }}+</em>评价</p>
+                            <p class="unit">{{ item.object.price }}/{{ item.object.unite }}</p>
+                            <a href="#" class="add_goods" title="加入购物车"></a>
+                        </div>
+                    </li>
                 {% endfor %}
-			</ul>
+            </ul>
 
-			<div class="pagenation">
+            <div class="pagenation">
                 {% if page.has_previous %}
-				<a href="/search?q={{ query }}&page={{ page.previous_page_number }}">上一页</a>
+                    <a href="{% url 'haystack_search' %}?q={{ query }}&page={{ page.previous_page_number }}">上一页</a>
+                {% else %}
+                    <a href="#">上一页</a>
                 {% endif %}
-                {% for pindex in paginator.page_range %}
-                    {% if pindex == page.number %}
-				    <a href="/search?q={{ query }}&page={{ pindex }}" class="active">{{ pindex }}</a>
+
+                {% for page_num in paginator.page_range %}
+                    {% if page_num == page.number %}
+                        <a href="{% url 'haystack_search' %}?q={{ query }}&page={{ page_num }}" class="active">
+                            {{ page_num }}</a>
                     {% else %}
-				    <a href="/search?q={{ query }}&page={{ pindex }}">{{ pindex }}</a>
+                        <a href="{% url 'haystack_search' %}?q={{ query }}&page={{ page_num }}">{{ page_num }}</a>
                     {% endif %}
-				{% endfor %}
+                {% endfor %}
+
+
                 {% if page.has_next %}
-				<a href="/search?q={{ query }}&page={{ page.next_page_number }}">下一页></a>
+                    <a href="{% url 'haystack_search' %}?q={{ query }}&page={{ page.next_page_number }}">下一页</a>
+                {% else %}
+                    <a href="#">下一页</a>
                 {% endif %}
-			</div>
-	</div>
-{% endblock main_content %}
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

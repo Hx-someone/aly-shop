@@ -151,7 +151,6 @@ class CartEditView(View):
         cart_conn.hdel(car_key,goods_id)  # 移除redis中的该条订单
 
         # 计算redis中还要多少商品总数
-
         total_count = sum([int(i) for i in cart_conn.hvals(car_key)])
 
         data = {
